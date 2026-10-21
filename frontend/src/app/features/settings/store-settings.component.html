@@ -1,0 +1,110 @@
+<app-page-header [title]="'settings.title' | i18next" [subtitle]="'settings.subtitle' | i18next" />
+
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+<div class="settings-layout">
+  <form class="card" clrForm clrLayout="vertical" [formGroup]="form" (ngSubmit)="save()">
+    <div class="card-block">
+      <clr-input-container>
+        <label>{{ 'settings.storeName' | i18next }}</label>
+        <input clrInput formControlName="storeName" />
+        <clr-control-helper>{{ 'settings.storeNameHint' | i18next }}</clr-control-helper>
+        <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+      </clr-input-container>
+
+      <clr-textarea-container>
+        <label>{{ 'settings.address' | i18next }}</label>
+        <textarea clrTextarea formControlName="address" rows="2"></textarea>
+      </clr-textarea-container>
+
+      <clr-input-container>
+        <label>{{ 'settings.phone' | i18next }}</label>
+        <input clrInput formControlName="phone" />
+      </clr-input-container>
+
+      <clr-input-container>
+        <label>{{ 'settings.email' | i18next }}</label>
+        <input clrInput type="email" formControlName="email" />
+        <clr-control-helper>{{ 'settings.emailHint' | i18next }}</clr-control-helper>
+        <clr-control-error>{{ 'validation.email' | i18next }}</clr-control-error>
+      </clr-input-container>
+
+      <clr-textarea-container>
+        <label>{{ 'settings.receiptFooter' | i18next }}</label>
+        <textarea clrTextarea formControlName="receiptFooter" rows="2"></textarea>
+        <clr-control-helper>{{ 'settings.receiptFooterHint' | i18next }}</clr-control-helper>
+      </clr-textarea-container>
+
+      <clr-input-container>
+        <label>{{ 'settings.currency' | i18next }}</label>
+        <input clrInput formControlName="currency" maxlength="3" class="currency" />
+        <clr-control-helper>{{ 'settings.currencyHint' | i18next }}</clr-control-helper>
+        <clr-control-error>{{ 'settings.currencyHint' | i18next }}</clr-control-error>
+      </clr-input-container>
+    </div>
+    <div class="card-footer">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [clrLoading]="saving()"
+        [disabled]="form.pristine"
+      >
+        {{ 'common.save' | i18next }}
+      </button>
+      <button type="button" class="btn btn-link" [disabled]="form.pristine" (click)="reset()">
+        {{ 'settings.reset' | i18next }}
+      </button>
+      @if (saved()?.updatedBy; as by) {
+        <span class="p7 text-muted updated">
+          {{
+            'settings.lastUpdated'
+              | i18next: { name: by, date: (saved()!.updatedAt | date: 'dd/MM/yyyy h:mm a') }
+          }}
+        </span>
+      }
+    </div>
+  </form>
+
+  <section>
+    <h5 class="preview-title">{{ 'settings.preview' | i18next }}</h5>
+    <article class="receipt-preview">
+      <div class="head">
+        <strong>{{ preview().storeName || '—' }}</strong>
+        @if (preview().address) {
+          <div>{{ preview().address }}</div>
+        }
+        @if (preview().phone) {
+          <div>{{ 'receipt.tel' | i18next }}: {{ preview().phone }}</div>
+        }
+        @if (preview().email) {
+          <div>{{ preview().email }}</div>
+        }
+      </div>
+      <div class="row">
+        <span>{{ 'receipt.number' | i18next }}</span
+        ><span>2610150001</span>
+      </div>
+      <div class="lines">
+        <div class="row">
+          <span>Body Lotion 400ml × 1</span><span>{{ 4500 | money }}</span>
+        </div>
+        <div class="row">
+          <span>Bar Soap 100g × 2</span><span>{{ 2400 | money }}</span>
+        </div>
+      </div>
+      <div class="row total">
+        <span>{{ 'pos.total' | i18next }}</span
+        ><span>{{ 6900 | money }}</span>
+      </div>
+      @if (preview().receiptFooter) {
+        <div class="foot">{{ preview().receiptFooter }}</div>
+      }
+    </article>
+  </section>
+</div>

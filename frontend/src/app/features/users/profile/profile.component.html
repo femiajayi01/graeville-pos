@@ -1,0 +1,82 @@
+<app-page-header
+  [title]="'nav.profile' | i18next"
+  [subtitle]="auth.user()?.email + ' · ' + auth.user()?.role"
+/>
+
+<div class="grid grid-2">
+  <form class="card" clrForm clrLayout="vertical" [formGroup]="profile" (ngSubmit)="saveProfile()">
+    <div class="card-header">{{ 'profile.details' | i18next }}</div>
+    <div class="card-block">
+      <clr-input-container>
+        <label>{{ 'users.firstName' | i18next }}</label>
+        <input clrInput formControlName="firstName" />
+      </clr-input-container>
+      <clr-input-container>
+        <label>{{ 'users.lastName' | i18next }}</label>
+        <input clrInput formControlName="lastName" />
+      </clr-input-container>
+    </div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-primary btn-sm" [clrLoading]="savingProfile()">
+        {{ 'common.save' | i18next }}
+      </button>
+    </div>
+  </form>
+
+  <form
+    class="card"
+    clrForm
+    clrLayout="vertical"
+    [formGroup]="password"
+    (ngSubmit)="changePassword()"
+  >
+    <div class="card-header">{{ 'profile.changePassword' | i18next }}</div>
+    <div class="card-block">
+      <clr-password-container>
+        <label>{{ 'profile.currentPassword' | i18next }}</label>
+        <input clrPassword formControlName="currentPassword" autocomplete="current-password" />
+        <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+      </clr-password-container>
+      <clr-password-container>
+        <label>{{ 'profile.newPassword' | i18next }}</label>
+        <input clrPassword formControlName="newPassword" autocomplete="new-password" />
+        <clr-control-error>{{ 'validation.minLength' | i18next: { count: 6 } }}</clr-control-error>
+      </clr-password-container>
+      <clr-password-container>
+        <label>{{ 'profile.confirmPassword' | i18next }}</label>
+        <input clrPassword formControlName="confirmPassword" autocomplete="new-password" />
+      </clr-password-container>
+      @if (password.hasError('mismatch') && password.get('confirmPassword')?.touched) {
+        <p class="error-text">{{ 'profile.mismatch' | i18next }}</p>
+      }
+      @if (passwordError()) {
+        <p class="error-text">{{ passwordError() }}</p>
+      }
+    </div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-primary btn-sm" [clrLoading]="savingPassword()">
+        {{ 'profile.changePassword' | i18next }}
+      </button>
+    </div>
+  </form>
+
+  <form
+    class="card"
+    clrForm
+    clrLayout="vertical"
+    [formGroup]="terminalForm"
+    (ngSubmit)="saveTerminal()"
+  >
+    <div class="card-header">{{ 'profile.terminal' | i18next }}</div>
+    <div class="card-block">
+      <p class="p7 text-muted">{{ 'profile.terminalHint' | i18next }}</p>
+      <clr-input-container>
+        <label>{{ 'profile.terminalName' | i18next }}</label>
+        <input clrInput formControlName="name" />
+      </clr-input-container>
+    </div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-outline btn-sm">{{ 'common.save' | i18next }}</button>
+    </div>
+  </form>
+</div>

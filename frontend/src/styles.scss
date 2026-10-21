@@ -1,0 +1,101 @@
+/* Global styles. Clarity's clr-ui.min.css is loaded first (angular.json). */
+
+html,
+body {
+  height: 100%;
+}
+
+.content-area {
+  padding: 1.5rem;
+}
+
+/* Right-aligned numeric columns */
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.text-muted {
+  color: var(--cds-global-typography-color-300, #666);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.clr-form-control:first-child {
+  margin-top: 0;
+}
+
+/* Receipts: only the receipt is printed */
+@media print {
+  .no-print,
+  header.header,
+  clr-vertical-nav,
+  app-toast-container {
+    display: none !important;
+  }
+  .content-area {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .main-container,
+  .content-container {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.2rem 0;
+}
+
+.period {
+  margin-top: 0.5rem;
+}
+
+.report-grid {
+  margin-top: 1rem;
+}
+
+.error-text {
+  color: var(--cds-alias-status-danger, #c21d00);
+}
+
+.footer-total {
+  margin-right: auto;
+}
+
+/* Clarity centres table cells by default; left-align text columns marked .left */
+.table th.left,
+.table td.left {
+  text-align: left;
+}
+
+/* Money columns in Clarity datagrids */
+clr-datagrid clr-dg-cell.num.datagrid-cell,
+clr-datagrid clr-dg-column.num.datagrid-column {
+  text-align: right;
+  justify-content: flex-end;
+}

@@ -1,0 +1,130 @@
+.pos-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .pos-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.scan {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border: 1px solid var(--cds-alias-object-border-color, #ccc);
+  border-radius: 6px;
+  background: var(--cds-alias-object-container-background, #fff);
+}
+
+.scan-input {
+  flex: 1;
+  font-size: 1.1rem;
+  height: 2.4rem;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 22rem;
+  overflow-y: auto;
+  background: var(--cds-alias-object-container-background, #fff);
+  border: 1px solid var(--cds-alias-object-border-color, #ccc);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 12%);
+
+  button {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    background: none;
+    cursor: pointer;
+
+    &:hover:not(:disabled),
+    &:focus {
+      background: var(--cds-alias-object-interaction-background-hover, #e8f1f6);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  .meta {
+    font-size: 0.75rem;
+    color: var(--cds-global-typography-color-300, #666);
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--cds-global-typography-color-300, #777);
+}
+
+.cart-table {
+  margin-top: 1rem;
+}
+
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.qty-input {
+  width: 4.5rem;
+  text-align: center;
+}
+
+.summary {
+  margin-top: 0;
+  position: sticky;
+  top: 1rem;
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+  }
+
+  .total {
+    font-size: 1.4rem;
+    border-top: 1px solid var(--cds-alias-object-border-color, #ddd);
+    margin-top: 0.4rem;
+    padding-top: 0.7rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .btn {
+      margin: 0;
+    }
+  }
+}
+
+.cart-table td {
+  vertical-align: middle;
+}
+
+.cart-table .left {
+  text-align: left;
+}

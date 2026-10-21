@@ -1,0 +1,98 @@
+<div class="main-container">
+  <header class="header header-6">
+    <div class="branding">
+      <a routerLink="/dashboard" class="nav-link">
+        <cds-icon shape="store" size="24"></cds-icon>
+        <span class="title">{{ storeInfo.info()?.name ?? ('app.name' | i18next) }}</span>
+        <span class="product">{{ storeInfo.info()?.appName ?? ('app.name' | i18next) }}</span>
+      </a>
+    </div>
+
+    <div class="header-nav">
+      <a routerLink="/sales/pos" routerLinkActive="active" class="nav-link nav-text">
+        <cds-icon shape="bar-code"></cds-icon> {{ 'nav.sell' | i18next }}
+      </a>
+    </div>
+
+    <form class="search" (ngSubmit)="findInvoice()">
+      <label for="invoice-search">
+        <input
+          id="invoice-search"
+          name="invoice"
+          type="text"
+          [(ngModel)]="invoiceNumber"
+          [placeholder]="'header.invoiceSearch' | i18next"
+          autocomplete="off"
+        />
+      </label>
+    </form>
+
+    <div class="header-actions">
+      @if (parkedCount() > 0) {
+        <a
+          routerLink="/sales/parked"
+          class="nav-link nav-icon-text"
+          [title]="'nav.parked' | i18next"
+        >
+          <cds-icon shape="pause"></cds-icon>
+          <span class="badge badge-orange">{{ parkedCount() }}</span>
+        </a>
+      }
+      @if (birthdayCount() > 0) {
+        <a
+          routerLink="/customers/birthdays"
+          class="nav-link nav-icon-text"
+          [title]="'nav.birthdays' | i18next"
+        >
+          <cds-icon shape="birthday-cake"></cds-icon>
+          <span class="badge badge-purple">{{ birthdayCount() }}</span>
+        </a>
+      }
+      <clr-dropdown>
+        <button class="nav-text" clrDropdownTrigger type="button">
+          <cds-icon shape="user"></cds-icon>
+          {{ auth.user()?.fullName }}
+          <cds-icon shape="angle" direction="down"></cds-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+          <div class="dropdown-header">
+            {{ auth.user()?.role }} · {{ 'header.terminal' | i18next }}: {{ terminal.id() }}
+          </div>
+          <a routerLink="/profile" clrDropdownItem>{{ 'nav.profile' | i18next }}</a>
+          <div class="dropdown-divider" role="separator"></div>
+          <button type="button" clrDropdownItem (click)="logout()">
+            <cds-icon shape="logout"></cds-icon> {{ 'header.logout' | i18next }}
+          </button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+  </header>
+
+  <div class="content-container">
+    <clr-vertical-nav [clrVerticalNavCollapsible]="true" [(clrVerticalNavCollapsed)]="navCollapsed">
+      <a clrVerticalNavLink routerLink="/dashboard" routerLinkActive="active">
+        <cds-icon clrVerticalNavIcon shape="dashboard"></cds-icon>
+        {{ 'nav.dashboard' | i18next }}
+      </a>
+      @for (group of nav; track group.label) {
+        @if (visible(group.items).length) {
+          <clr-vertical-nav-group routerLinkActive="active" [clrVerticalNavGroupExpanded]="true">
+            <cds-icon clrVerticalNavIcon [shape]="group.icon"></cds-icon>
+            {{ group.label | i18next }}
+            <clr-vertical-nav-group-children>
+              @for (item of visible(group.items); track item.path) {
+                <a clrVerticalNavLink [routerLink]="item.path" routerLinkActive="active">
+                  {{ item.label | i18next }}
+                </a>
+              }
+            </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+        }
+      }
+    </clr-vertical-nav>
+
+    <main class="content-area">
+      <router-outlet />
+    </main>
+  </div>
+</div>

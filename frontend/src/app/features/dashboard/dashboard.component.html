@@ -1,0 +1,60 @@
+<app-page-header
+  [title]="'dashboard.title' | i18next: { name: auth.user()?.firstName }"
+  [subtitle]="'dashboard.subtitle' | i18next"
+>
+  <a routerLink="/sales/pos" class="btn btn-primary"
+    ><cds-icon shape="bar-code"></cds-icon> {{ 'nav.sell' | i18next }}</a
+  >
+</app-page-header>
+
+@if (stats(); as s) {
+  <div class="grid grid-4">
+    <app-stat-card
+      icon="wallet"
+      [label]="'dashboard.mySalesToday' | i18next"
+      [value]="s.mySalesToday.amountPaid | money"
+      [hint]="
+        'dashboard.ordersItems'
+          | i18next: { orders: s.mySalesToday.orderCount, items: s.mySalesToday.itemCount }
+      "
+    />
+    @if (s.storeSalesToday; as store) {
+      <app-stat-card
+        icon="store"
+        [label]="'dashboard.storeSalesToday' | i18next"
+        [value]="store.amountPaid | money"
+        [hint]="
+          'dashboard.ordersItems' | i18next: { orders: store.orderCount, items: store.itemCount }
+        "
+      />
+    }
+    <app-stat-card icon="pause" [label]="'dashboard.parked' | i18next" [value]="s.parkedSales" />
+    <app-stat-card
+      icon="birthday-cake"
+      [label]="'dashboard.birthdays' | i18next"
+      [value]="s.birthdaysToday"
+    />
+    <app-stat-card
+      icon="exclamation-triangle"
+      [label]="'dashboard.outOfStock' | i18next"
+      [value]="s.outOfStock"
+      [hint]="'dashboard.ofProducts' | i18next: { count: s.productCount }"
+      [tone]="s.outOfStock > 0 ? 'warn' : 'default'"
+    />
+  </div>
+} @else {
+  <span class="spinner spinner-inline"></span> {{ 'common.loading' | i18next }}
+}
+
+<h4>{{ 'dashboard.shortcuts' | i18next }}</h4>
+<div class="grid grid-4 shortcuts">
+  @for (s of shortcuts; track s.path) {
+    <a class="card clickable" [routerLink]="s.path">
+      <div class="card-block">
+        <cds-icon [shape]="s.icon" size="32"></cds-icon>
+        <div class="card-title">{{ s.label | i18next }}</div>
+        <p class="card-text text-muted">{{ s.hint | i18next }}</p>
+      </div>
+    </a>
+  }
+</div>

@@ -1,0 +1,93 @@
+<app-page-header [title]="titleKey() | i18next">
+  <a routerLink="/reports/close-day" class="btn btn-outline btn-sm">{{
+    'nav.closeDay' | i18next
+  }}</a>
+</app-page-header>
+
+<form class="toolbar" (ngSubmit)="applyFilters()">
+  @if (isAll()) {
+    <clr-input-container>
+      <label>{{ 'common.from' | i18next }}</label>
+      <input type="date" clrInput name="from" [(ngModel)]="from" />
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'common.to' | i18next }}</label>
+      <input type="date" clrInput name="to" [(ngModel)]="to" />
+    </clr-input-container>
+    <clr-select-container>
+      <label>{{ 'reports.salesperson' | i18next }}</label>
+      <select clrSelect name="salesperson" [(ngModel)]="salesperson">
+        <option value="">{{ 'common.all' | i18next }}</option>
+        @for (name of salespeople(); track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+    </clr-select-container>
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox name="includeReturned" [(ngModel)]="includeReturned" />
+      <label>{{ 'sales.includeReturned' | i18next }}</label>
+    </clr-checkbox-wrapper>
+  }
+  <clr-input-container>
+    <label>{{ 'common.search' | i18next }}</label>
+    <input
+      clrInput
+      name="search"
+      [(ngModel)]="search"
+      [placeholder]="'sales.searchHint' | i18next"
+    />
+  </clr-input-container>
+  <button type="submit" class="btn btn-primary btn-sm">{{ 'common.apply' | i18next }}</button>
+</form>
+
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'receipt.number' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'receipt.customer' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'sales.items' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'pos.total' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'receipt.amountPaid' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'checkout.paymentType' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'receipt.servedBy' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'receipt.date' | i18next }}</clr-dg-column>
+
+  <clr-dg-placeholder>{{ 'sales.none' | i18next }}</clr-dg-placeholder>
+
+  @for (o of orders(); track o.id) {
+    <clr-dg-row [clrDgItem]="o">
+      <clr-dg-cell>
+        <a [routerLink]="['/sales/receipt', o.id]">{{ o.orderNumber }}</a>
+        @if (o.isReturned) {
+          <span class="label label-danger">{{ 'sales.returned' | i18next }}</span>
+        }
+      </clr-dg-cell>
+      <clr-dg-cell>{{ o.customerName || ('receipt.walkIn' | i18next) }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.quantity }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.totalPrice | money }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.amountPaid | money }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.paymentType }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.salesperson }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.createdAt | date: 'dd/MM/yyyy h:mm a' }}</clr-dg-cell>
+    </clr-dg-row>
+  }
+
+  <clr-dg-footer>
+    <span class="footer-total"
+      >{{ 'sales.pageTotal' | i18next }}: <strong>{{ pageTotal() | money }}</strong></span
+    >
+    <clr-dg-pagination #pagination [clrDgPageSize]="25" [clrDgTotalItems]="total()">
+      <clr-dg-page-size [clrPageSizeOptions]="[25, 50, 100, 200]">{{
+        'common.perPage' | i18next
+      }}</clr-dg-page-size>
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+      {{ total() }}
+    </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>

@@ -1,0 +1,14 @@
+.login-wrapper {
+  background: linear-gradient(135deg, #0b3d5c 0%, #1b6a8f 55%, #f0f4f7 55%);
+}
+
+.login .error.active {
+  display: block;
+}
+
+.powered-by {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  color: var(--cds-global-typography-color-300, #777);
+  text-align: center;
+}

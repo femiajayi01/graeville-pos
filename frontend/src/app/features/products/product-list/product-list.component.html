@@ -1,0 +1,152 @@
+<app-page-header [title]="'nav.products' | i18next">
+  @if (auth.isManager()) {
+    <button type="button" class="btn btn-outline btn-sm" (click)="openImport()">
+      <cds-icon shape="import"></cds-icon> {{ 'products.import' | i18next }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline btn-sm"
+      [clrLoading]="exporting()"
+      (click)="exportExcel()"
+    >
+      <cds-icon shape="download"></cds-icon> {{ 'products.export' | i18next }}
+    </button>
+  }
+  <a routerLink="/products/new" class="btn btn-primary btn-sm"
+    ><cds-icon shape="plus"></cds-icon> {{ 'products.add' | i18next }}</a
+  >
+</app-page-header>
+
+<form class="toolbar" (ngSubmit)="applyFilters()">
+  <clr-input-container>
+    <label>{{ 'common.search' | i18next }}</label>
+    <input
+      clrInput
+      name="search"
+      [(ngModel)]="search"
+      [placeholder]="'products.searchHint' | i18next"
+    />
+  </clr-input-container>
+  <clr-select-container>
+    <label>{{ 'products.brand' | i18next }}</label>
+    <select clrSelect name="brandId" [(ngModel)]="brandId">
+      <option value="">{{ 'common.all' | i18next }}</option>
+      @for (b of brands(); track b.id) {
+        <option [value]="b.id">{{ b.name }}</option>
+      }
+    </select>
+  </clr-select-container>
+  <clr-select-container>
+    <label>{{ 'products.category' | i18next }}</label>
+    <select clrSelect name="categoryId" [(ngModel)]="categoryId">
+      <option value="">{{ 'common.all' | i18next }}</option>
+      @for (c of categories(); track c.id) {
+        <option [value]="c.id">{{ c.name }}</option>
+      }
+    </select>
+  </clr-select-container>
+  <clr-checkbox-wrapper>
+    <input type="checkbox" clrCheckbox name="outOfStock" [(ngModel)]="outOfStock" />
+    <label>{{ 'products.onlyOutOfStock' | i18next }}</label>
+  </clr-checkbox-wrapper>
+  <button type="submit" class="btn btn-primary btn-sm">{{ 'common.apply' | i18next }}</button>
+</form>
+
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'products.name' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'products.barcode' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'products.brand' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'products.category' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'products.costPrice' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'products.sellingPrice' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'products.stock' | i18next }}</clr-dg-column>
+  <clr-dg-placeholder>{{ 'products.none' | i18next }}</clr-dg-placeholder>
+
+  @for (p of rows(); track p.id) {
+    <clr-dg-row [clrDgItem]="p">
+      <clr-dg-action-overflow>
+        <a class="action-item" [routerLink]="['/products', p.id, 'edit']">{{
+          'common.edit' | i18next
+        }}</a>
+        @if (auth.isManager()) {
+          <button class="action-item" type="button" (click)="remove(p)">
+            {{ 'common.delete' | i18next }}
+          </button>
+        }
+      </clr-dg-action-overflow>
+      <clr-dg-cell
+        ><a [routerLink]="['/products', p.id, 'edit']">{{ p.name }}</a></clr-dg-cell
+      >
+      <clr-dg-cell>{{ p.barcode }}</clr-dg-cell>
+      <clr-dg-cell>{{ p.brand?.name || '—' }}</clr-dg-cell>
+      <clr-dg-cell>{{ p.category?.name || '—' }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ p.costPrice | money }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ p.sellingPrice | money }}</clr-dg-cell>
+      <clr-dg-cell class="num">
+        @if (p.quantity === 0) {
+          <span class="label label-danger">{{ 'pos.soldOut' | i18next }}</span>
+        } @else {
+          {{ p.quantity }}
+        }
+      </clr-dg-cell>
+    </clr-dg-row>
+  }
+
+  <clr-dg-footer>
+    <clr-dg-pagination #pagination [clrDgPageSize]="50" [clrDgTotalItems]="total()">
+      <clr-dg-page-size [clrPageSizeOptions]="[25, 50, 100, 200]">{{
+        'common.perPage' | i18next
+      }}</clr-dg-page-size>
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+      {{ total() }}
+    </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="importOpen">
+  <h3 class="modal-title">{{ 'products.importTitle' | i18next }}</h3>
+  <div class="modal-body">
+    <p>{{ 'products.importHelp' | i18next }}</p>
+    <label class="clr-control-label" for="import-file">{{ 'products.importFile' | i18next }}</label>
+    <input id="import-file" type="file" accept=".xlsx" (change)="onFile($event)" />
+    @if (importResult(); as r) {
+      <clr-alert
+        [clrAlertType]="r.errors.length ? 'warning' : 'success'"
+        [clrAlertClosable]="false"
+      >
+        <clr-alert-item>
+          <span class="alert-text">{{
+            'products.importSummary'
+              | i18next
+                : {
+                    created: r.created,
+                    updated: r.updated,
+                    skipped: r.skipped,
+                    errors: r.errors.length,
+                  }
+          }}</span>
+        </clr-alert-item>
+      </clr-alert>
+      @if (r.errors.length) {
+        <ul class="list p7">
+          @for (e of r.errors.slice(0, 20); track e.row) {
+            <li>{{ 'products.importRow' | i18next: { row: e.row } }}: {{ e.message }}</li>
+          }
+        </ul>
+      }
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="importOpen.set(false)">
+      {{ 'common.close' | i18next }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [clrLoading]="importing()"
+      (click)="importExcel()"
+    >
+      {{ 'products.import' | i18next }}
+    </button>
+  </div>
+</clr-modal>

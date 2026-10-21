@@ -1,0 +1,46 @@
+<div class="login-wrapper">
+  <form class="login" [formGroup]="form" (ngSubmit)="submit()" clrForm clrLayout="vertical">
+    <section class="title">
+      <h3 class="welcome">{{ 'login.welcome' | i18next }}</h3>
+      {{ storeInfo.info()?.name ?? ('app.name' | i18next) }}
+      <h5 class="hint">{{ 'login.subtitle' | i18next }}</h5>
+    </section>
+
+    <div class="login-group">
+      <clr-input-container>
+        <label>{{ 'login.email' | i18next }}</label>
+        <input clrInput type="email" formControlName="email" autocomplete="username" autofocus />
+        <clr-control-error *clrIfError="'required'">{{
+          'validation.required' | i18next
+        }}</clr-control-error>
+        <clr-control-error *clrIfError="'email'">{{
+          'validation.email' | i18next
+        }}</clr-control-error>
+      </clr-input-container>
+
+      <clr-password-container>
+        <label>{{ 'login.password' | i18next }}</label>
+        <input clrPassword formControlName="password" autocomplete="current-password" />
+        <clr-control-error *clrIfError="'required'">{{
+          'validation.required' | i18next
+        }}</clr-control-error>
+        <clr-control-error *clrIfError="'minlength'">{{
+          'validation.minLength' | i18next: { count: 4 }
+        }}</clr-control-error>
+      </clr-password-container>
+
+      @if (error()) {
+        <div class="error active">{{ error() }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary" [clrLoading]="loading()">
+        {{ 'login.submit' | i18next }}
+      </button>
+      <p class="powered-by">
+        {{
+          'login.poweredBy' | i18next: { app: storeInfo.info()?.appName ?? ('app.name' | i18next) }
+        }}
+      </p>
+    </div>
+  </form>
+</div>

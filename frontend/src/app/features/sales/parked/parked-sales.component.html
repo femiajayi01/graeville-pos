@@ -1,0 +1,52 @@
+<app-page-header
+  [title]="'nav.parked' | i18next"
+  [subtitle]="'parked.subtitle' | i18next: { terminal: terminal.id() }"
+>
+  <a routerLink="/sales/pos" class="btn btn-primary btn-sm"
+    ><cds-icon shape="bar-code"></cds-icon> {{ 'nav.sell' | i18next }}</a
+  >
+</app-page-header>
+
+<clr-datagrid [clrDgLoading]="loading()">
+  <clr-dg-column>#</clr-dg-column>
+  <clr-dg-column>{{ 'parked.label' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'sales.items' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'pos.total' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'parked.parkedBy' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'parked.when' | i18next }}</clr-dg-column>
+  <clr-dg-column></clr-dg-column>
+  <clr-dg-placeholder>{{ 'parked.none' | i18next }}</clr-dg-placeholder>
+
+  @for (p of parked(); track p.id; let i = $index) {
+    <clr-dg-row [clrDgItem]="p">
+      <clr-dg-cell>{{ i + 1 }}</clr-dg-cell>
+      <clr-dg-cell>{{ p.label || '—' }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ p.totalQty }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ p.totalPrice | money }}</clr-dg-cell>
+      <clr-dg-cell>{{ p.parkedBy }}</clr-dg-cell>
+      <clr-dg-cell>{{ p.createdAt | date: 'dd/MM h:mm a' }}</clr-dg-cell>
+      <clr-dg-cell>
+        <button type="button" class="btn btn-sm btn-success" (click)="resume(p)">
+          <cds-icon shape="play"></cds-icon> {{ 'parked.resume' | i18next }}
+        </button>
+        <button type="button" class="btn btn-sm btn-link btn-danger" (click)="discard(p)">
+          {{ 'parked.discard' | i18next }}
+        </button>
+      </clr-dg-cell>
+      <clr-dg-row-detail *clrIfExpanded>
+        <table class="table table-compact">
+          <tbody>
+            @for (item of p.items; track item.productId) {
+              <tr>
+                <td class="left">{{ item.productName }}</td>
+                <td>× {{ item.quantity }}</td>
+                <td class="num">{{ item.subtotal | money }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </clr-dg-row-detail>
+    </clr-dg-row>
+  }
+  <clr-dg-footer>{{ parked().length }} {{ 'parked.count' | i18next }}</clr-dg-footer>
+</clr-datagrid>

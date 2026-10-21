@@ -1,0 +1,60 @@
+<app-page-header [title]="'nav.customers' | i18next">
+  <a routerLink="/customers/birthdays" class="btn btn-outline btn-sm"
+    ><cds-icon shape="birthday-cake"></cds-icon> {{ 'nav.birthdays' | i18next }}</a
+  >
+  <a routerLink="/customers/new" class="btn btn-primary btn-sm"
+    ><cds-icon shape="plus"></cds-icon> {{ 'customers.add' | i18next }}</a
+  >
+</app-page-header>
+
+<form class="toolbar" (ngSubmit)="applySearch()">
+  <clr-input-container>
+    <label>{{ 'common.search' | i18next }}</label>
+    <input
+      clrInput
+      name="search"
+      [(ngModel)]="search"
+      [placeholder]="'customers.searchHint' | i18next"
+    />
+  </clr-input-container>
+  <button type="submit" class="btn btn-primary btn-sm">{{ 'common.apply' | i18next }}</button>
+</form>
+
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'customers.fullName' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'customers.phone' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'customers.email' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'customers.birthdate' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'customers.registeredBy' | i18next }}</clr-dg-column>
+  <clr-dg-placeholder>{{ 'common.noRecords' | i18next }}</clr-dg-placeholder>
+
+  @for (c of rows(); track c.id) {
+    <clr-dg-row [clrDgItem]="c">
+      <clr-dg-action-overflow>
+        <a class="action-item" [routerLink]="['/customers', c.id]">{{ 'common.view' | i18next }}</a>
+        <a class="action-item" [routerLink]="['/customers', c.id, 'edit']">{{
+          'common.edit' | i18next
+        }}</a>
+        @if (auth.isManager()) {
+          <button class="action-item" type="button" (click)="remove(c)">
+            {{ 'common.delete' | i18next }}
+          </button>
+        }
+      </clr-dg-action-overflow>
+      <clr-dg-cell
+        ><a [routerLink]="['/customers', c.id]">{{ c.fullName }}</a></clr-dg-cell
+      >
+      <clr-dg-cell>{{ c.phoneNo }}</clr-dg-cell>
+      <clr-dg-cell>{{ c.email || '—' }}</clr-dg-cell>
+      <clr-dg-cell>{{ c.birthdate ? (c.birthdate | date: 'd MMM yyyy') : '—' }}</clr-dg-cell>
+      <clr-dg-cell>{{ c.registeredBy }}</clr-dg-cell>
+    </clr-dg-row>
+  }
+
+  <clr-dg-footer>
+    <clr-dg-pagination #pagination [clrDgPageSize]="20" [clrDgTotalItems]="total()">
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+      {{ total() }}
+    </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>

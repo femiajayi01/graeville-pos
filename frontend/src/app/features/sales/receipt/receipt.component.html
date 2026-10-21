@@ -1,0 +1,143 @@
+<div class="no-print toolbar">
+  <a routerLink="/sales/mine/today" class="btn btn-link btn-sm"
+    >&laquo; {{ 'common.back' | i18next }}</a
+  >
+  <span class="spacer"></span>
+  @if (order()) {
+    <a routerLink="/sales/pos" class="btn btn-primary btn-sm"
+      ><cds-icon shape="bar-code"></cds-icon> {{ 'receipt.newSale' | i18next }}</a
+    >
+    <button type="button" class="btn btn-outline btn-sm" (click)="doPrint()">
+      <cds-icon shape="printer"></cds-icon> {{ 'receipt.print' | i18next }}
+    </button>
+    <button type="button" class="btn btn-outline btn-sm" (click)="emailOpen.set(true)">
+      <cds-icon shape="envelope"></cds-icon> {{ 'receipt.email' | i18next }}
+    </button>
+    @if (canReturn()) {
+      <button
+        type="button"
+        class="btn btn-danger-outline btn-sm"
+        [clrLoading]="returning()"
+        (click)="returnOrder()"
+      >
+        <cds-icon shape="undo"></cds-icon> {{ 'receipt.returnItems' | i18next }}
+      </button>
+    }
+  }
+</div>
+
+@if (loadError()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ loadError() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+@if (order(); as o) {
+  <article class="receipt">
+    @if (o.isReturned) {
+      <div class="returned-stamp">{{ 'receipt.returnedStamp' | i18next }}</div>
+    }
+    <div class="receipt-head">
+      <h3>{{ store.info()?.name }}</h3>
+      <p>{{ store.info()?.address }}</p>
+      <p>{{ 'receipt.tel' | i18next }}: {{ store.info()?.phone }}</p>
+    </div>
+
+    <div class="meta">
+      <div>
+        <span>{{ 'receipt.number' | i18next }}</span
+        ><strong>{{ o.orderNumber }}</strong>
+      </div>
+      <div>
+        <span>{{ 'receipt.date' | i18next }}</span
+        ><span>{{ o.createdAt | date: 'dd/MM/yyyy h:mm a' }}</span>
+      </div>
+      <div>
+        <span>{{ 'receipt.servedBy' | i18next }}</span
+        ><span>{{ o.salesperson }}</span>
+      </div>
+      <div>
+        <span>{{ 'receipt.customer' | i18next }}</span
+        ><span>{{ o.customerName || ('receipt.walkIn' | i18next) }}</span>
+      </div>
+    </div>
+
+    <table class="lines">
+      <thead>
+        <tr>
+          <th class="left">{{ 'pos.item' | i18next }}</th>
+          <th>{{ 'receipt.qty' | i18next }}</th>
+          <th class="num">{{ 'receipt.price' | i18next }}</th>
+          <th class="num">{{ 'pos.subtotal' | i18next }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of o.items; track item.id) {
+          <tr>
+            <td class="left">{{ item.productName }}</td>
+            <td>{{ item.quantity }}</td>
+            <td class="num">{{ item.unitPrice | money }}</td>
+            <td class="num">{{ item.subtotal | money }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div>
+        <span>{{ 'pos.total' | i18next }}</span
+        ><strong>{{ o.totalPrice | money }}</strong>
+      </div>
+      @if (o.discount > 0) {
+        <div>
+          <span>{{ 'checkout.discount' | i18next }}</span
+          ><span>-{{ o.discount | money }}</span>
+        </div>
+        <div class="grand">
+          <span>{{ 'receipt.amountPaid' | i18next }}</span
+          ><strong>{{ o.amountPaid | money }}</strong>
+        </div>
+      }
+      <div>
+        <span>{{ 'checkout.paymentType' | i18next }}</span
+        ><span>{{ o.paymentType }}</span>
+      </div>
+    </div>
+
+    @if (o.isReturned) {
+      <p class="returned-note">
+        {{
+          'receipt.returnedBy'
+            | i18next: { name: o.returnedBy, date: (o.returnedAt | date: 'dd/MM/yyyy h:mm a') }
+        }}
+      </p>
+    }
+    <div class="receipt-foot">{{ store.info()?.receiptFooter }}</div>
+  </article>
+}
+
+<clr-modal [(clrModalOpen)]="emailOpen" clrModalSize="sm">
+  <h3 class="modal-title">{{ 'receipt.emailTitle' | i18next }}</h3>
+  <div class="modal-body">
+    <clr-input-container>
+      <label>{{ 'customers.email' | i18next }}</label>
+      <input clrInput type="email" name="emailTo" [(ngModel)]="emailTo" />
+    </clr-input-container>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="emailOpen.set(false)">
+      {{ 'common.cancel' | i18next }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!emailTo.trim()"
+      [clrLoading]="sending()"
+      (click)="sendEmail()"
+    >
+      {{ 'receipt.send' | i18next }}
+    </button>
+  </div>
+</clr-modal>

@@ -1,0 +1,94 @@
+<app-page-header [title]="'nav.sync' | i18next" [subtitle]="'sync.subtitle' | i18next">
+  @if (auth.isManager()) {
+    <button
+      type="button"
+      class="btn btn-primary btn-sm"
+      [disabled]="!status()?.remoteConfigured"
+      [clrLoading]="busy() === 'all'"
+      (click)="runAll()"
+    >
+      <cds-icon shape="sync"></cds-icon> {{ 'sync.runAll' | i18next }}
+    </button>
+  }
+</app-page-header>
+
+@if (status(); as s) {
+  @if (!s.remoteConfigured) {
+    <clr-alert clrAlertType="warning" [clrAlertClosable]="false">
+      <clr-alert-item
+        ><span class="alert-text">{{ 'sync.notConfigured' | i18next }}</span></clr-alert-item
+      >
+    </clr-alert>
+  } @else {
+    <p class="text-muted">
+      {{ 'sync.remote' | i18next }}: <code>{{ s.remoteUrl }}</code> ·
+      {{ (s.cronEnabled ? 'sync.cronOn' : 'sync.cronOff') | i18next }}
+      @if (s.lastRun) {
+        · {{ 'sync.lastRun' | i18next }}: {{ s.lastRun.at | date: 'dd/MM/yyyy h:mm a' }}
+      }
+    </p>
+  }
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="left">{{ 'sync.entity' | i18next }}</th>
+        <th>{{ 'sync.pending' | i18next }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (p of s.pending; track p.entity) {
+        <tr>
+          <td class="left">{{ 'sync.entities.' + p.entity | i18next }}</td>
+          <td>
+            @if (p.pending > 0) {
+              <span class="badge badge-orange">{{ p.pending }}</span>
+            } @else {
+              <span class="badge badge-success">0</span>
+            }
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              [disabled]="!s.remoteConfigured || !!busy()"
+              [clrLoading]="busy() === 'push:' + p.entity"
+              (click)="push(p.entity)"
+            >
+              {{ 'sync.push' | i18next }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              [disabled]="!s.remoteConfigured || !!busy()"
+              [clrLoading]="busy() === 'pull:' + p.entity"
+              (click)="pull(p.entity)"
+            >
+              {{ 'sync.pull' | i18next }}
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (results().length) {
+  <h4>{{ 'sync.results' | i18next }}</h4>
+  <table class="table table-compact">
+    <tbody>
+      @for (r of results(); track $index) {
+        <tr>
+          <td class="left">{{ r.direction }} · {{ 'sync.entities.' + r.entity | i18next }}</td>
+          <td>{{ r.count }}</td>
+          <td class="left">
+            @for (e of r.errors.slice(0, 3); track $index) {
+              <div class="error-text p7">{{ e.key }} {{ e.message }}</div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

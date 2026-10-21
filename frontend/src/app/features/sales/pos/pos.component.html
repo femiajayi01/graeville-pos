@@ -1,0 +1,189 @@
+<app-page-header [title]="'pos.title' | i18next" [subtitle]="'pos.subtitle' | i18next">
+  <a routerLink="/sales/parked" class="btn btn-outline btn-sm"
+    ><cds-icon shape="pause"></cds-icon> {{ 'nav.parked' | i18next }}</a
+  >
+</app-page-header>
+
+@if (cart.packingId()) {
+  <clr-alert clrAlertType="info" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ 'pos.resumedParked' | i18next }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+<div class="pos-layout">
+  <section class="cart-panel">
+    <form class="scan" (ngSubmit)="scan()" autocomplete="off">
+      <cds-icon shape="bar-code" size="24"></cds-icon>
+      <input
+        #scanInput
+        name="code"
+        class="clr-input scan-input"
+        [(ngModel)]="code"
+        (ngModelChange)="onType($event)"
+        [placeholder]="'pos.scanPlaceholder' | i18next"
+        [attr.aria-label]="'pos.scanPlaceholder' | i18next"
+      />
+      <button type="submit" class="btn btn-primary" [clrLoading]="looking()">
+        {{ 'pos.add' | i18next }}
+      </button>
+
+      @if (suggestions().length) {
+        <ul class="suggestions" role="listbox">
+          @for (p of suggestions(); track p.id) {
+            <li>
+              <button type="button" [disabled]="p.quantity <= 0" (click)="pick(p)">
+                <span class="name">{{ p.name }}</span>
+                <span class="meta"
+                  >{{ p.barcode }} · {{ p.sellingPrice | money }} ·
+                  @if (p.quantity > 0) {
+                    {{ 'pos.inStock' | i18next: { count: p.quantity } }}
+                  } @else {
+                    <strong>{{ 'pos.soldOut' | i18next }}</strong>
+                  }
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </form>
+
+    @if (cart.isEmpty()) {
+      <div class="empty">
+        <cds-icon shape="shopping-cart" size="48"></cds-icon>
+        <p>{{ 'pos.empty' | i18next }}</p>
+      </div>
+    } @else {
+      <table class="table table-compact cart-table">
+        <thead>
+          <tr>
+            <th class="left">{{ 'pos.item' | i18next }}</th>
+            <th>{{ 'pos.quantity' | i18next }}</th>
+            <th class="num">{{ 'pos.unitPrice' | i18next }}</th>
+            <th class="num">{{ 'pos.subtotal' | i18next }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of cart.items(); track item.productId) {
+            <tr>
+              <td class="left">
+                {{ item.name }}
+                <div class="p7 text-muted">{{ item.barcode }}</div>
+              </td>
+              <td>
+                <div class="qty">
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-sm btn-link"
+                    (click)="cart.decrement(item.productId)"
+                    [attr.aria-label]="'pos.decrease' | i18next"
+                  >
+                    <cds-icon shape="minus"></cds-icon>
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    class="clr-input qty-input"
+                    [ngModel]="item.quantity"
+                    (change)="setQuantity(item.productId, $any($event.target).value)"
+                    [attr.aria-label]="'pos.quantity' | i18next"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-sm btn-link"
+                    (click)="increment(item.productId, item.name)"
+                    [attr.aria-label]="'pos.increase' | i18next"
+                  >
+                    <cds-icon shape="plus"></cds-icon>
+                  </button>
+                </div>
+              </td>
+              <td class="num">{{ item.unitPrice | money }}</td>
+              <td class="num">{{ item.unitPrice * item.quantity | money }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-icon btn-sm btn-link btn-danger"
+                  (click)="cart.remove(item.productId)"
+                  [attr.aria-label]="'common.remove' | i18next"
+                >
+                  <cds-icon shape="times"></cds-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <aside class="summary card">
+    <div class="card-block">
+      <div class="row">
+        <span>{{ 'pos.items' | i18next }}</span
+        ><strong>{{ cart.totalQty() }}</strong>
+      </div>
+      <div class="row total">
+        <span>{{ 'pos.total' | i18next }}</span
+        ><strong>{{ cart.totalPrice() | money }}</strong>
+      </div>
+    </div>
+    <div class="card-footer actions">
+      <button
+        type="button"
+        class="btn btn-success btn-block"
+        [disabled]="cart.isEmpty()"
+        (click)="checkoutOpen.set(true)"
+      >
+        <cds-icon shape="wallet"></cds-icon> {{ 'pos.checkout' | i18next }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-warning-outline btn-block"
+        [disabled]="cart.isEmpty()"
+        (click)="parkOpen.set(true)"
+      >
+        <cds-icon shape="pause"></cds-icon> {{ 'pos.park' | i18next }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-link btn-block"
+        [disabled]="cart.isEmpty()"
+        (click)="clearCart()"
+      >
+        {{ 'pos.clear' | i18next }}
+      </button>
+    </div>
+  </aside>
+</div>
+
+<clr-modal [(clrModalOpen)]="parkOpen" clrModalSize="sm">
+  <h3 class="modal-title">{{ 'pos.parkTitle' | i18next }}</h3>
+  <div class="modal-body">
+    <p>{{ 'pos.parkMessage' | i18next }}</p>
+    <clr-input-container>
+      <label>{{ 'pos.parkLabel' | i18next }}</label>
+      <input
+        clrInput
+        name="parkLabel"
+        [(ngModel)]="parkLabel"
+        [placeholder]="'pos.parkLabelHint' | i18next"
+      />
+    </clr-input-container>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="parkOpen.set(false)">
+      {{ 'common.cancel' | i18next }}
+    </button>
+    <button type="button" class="btn btn-warning" [clrLoading]="parking()" (click)="park()">
+      {{ 'pos.park' | i18next }}
+    </button>
+  </div>
+</clr-modal>
+
+@if (checkoutOpen()) {
+  <app-checkout-modal (closed)="checkoutOpen.set(false)" (completed)="onCompleted($event)" />
+}

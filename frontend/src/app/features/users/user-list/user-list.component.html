@@ -1,0 +1,103 @@
+<app-page-header [title]="'nav.users' | i18next">
+  <button type="button" class="btn btn-primary btn-sm" (click)="open()">
+    <cds-icon shape="plus"></cds-icon> {{ 'users.add' | i18next }}
+  </button>
+</app-page-header>
+
+<form class="toolbar" (ngSubmit)="applySearch()">
+  <clr-input-container>
+    <label>{{ 'common.search' | i18next }}</label>
+    <input clrInput name="search" [(ngModel)]="search" />
+  </clr-input-container>
+  <button type="submit" class="btn btn-primary btn-sm">{{ 'common.apply' | i18next }}</button>
+</form>
+
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'users.firstName' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'users.lastName' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'login.email' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'users.role' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'customers.registeredBy' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'common.createdAt' | i18next }}</clr-dg-column>
+  <clr-dg-placeholder>{{ 'common.noRecords' | i18next }}</clr-dg-placeholder>
+
+  @for (u of rows(); track u.id) {
+    <clr-dg-row [clrDgItem]="u">
+      <clr-dg-action-overflow>
+        <button class="action-item" type="button" (click)="open(u)">
+          {{ 'common.edit' | i18next }}
+        </button>
+        @if (u.id !== auth.user()?.id) {
+          <button class="action-item" type="button" (click)="remove(u)">
+            {{ 'common.delete' | i18next }}
+          </button>
+        }
+      </clr-dg-action-overflow>
+      <clr-dg-cell>{{ u.firstName }}</clr-dg-cell>
+      <clr-dg-cell>{{ u.lastName }}</clr-dg-cell>
+      <clr-dg-cell>{{ u.email }}</clr-dg-cell>
+      <clr-dg-cell
+        ><span class="label" [class.label-blue]="u.role !== 'User'">{{ u.role }}</span></clr-dg-cell
+      >
+      <clr-dg-cell>{{ u.registeredBy }}</clr-dg-cell>
+      <clr-dg-cell>{{ u.createdAt | date: 'dd/MM/yyyy' }}</clr-dg-cell>
+    </clr-dg-row>
+  }
+
+  <clr-dg-footer>
+    <clr-dg-pagination #pagination [clrDgPageSize]="20" [clrDgTotalItems]="total()">
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+      {{ total() }}
+    </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="formOpen">
+  <h3 class="modal-title">{{ (editing() ? 'users.editTitle' : 'users.newTitle') | i18next }}</h3>
+  <div class="modal-body">
+    <form clrForm clrLayout="vertical" [formGroup]="form">
+      <clr-input-container>
+        <label>{{ 'users.firstName' | i18next }}</label>
+        <input clrInput formControlName="firstName" />
+        <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+      </clr-input-container>
+      <clr-input-container>
+        <label>{{ 'users.lastName' | i18next }}</label>
+        <input clrInput formControlName="lastName" />
+        <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+      </clr-input-container>
+      <clr-input-container>
+        <label>{{ 'login.email' | i18next }}</label>
+        <input clrInput type="email" formControlName="email" />
+        <clr-control-error>{{ 'validation.email' | i18next }}</clr-control-error>
+      </clr-input-container>
+      <clr-select-container>
+        <label>{{ 'users.role' | i18next }}</label>
+        <select clrSelect formControlName="role">
+          @for (r of roles(); track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      </clr-select-container>
+      <clr-password-container>
+        <label>{{ (editing() ? 'users.resetPassword' : 'login.password') | i18next }}</label>
+        <input clrPassword formControlName="password" autocomplete="new-password" />
+        <clr-control-helper>{{
+          (editing() ? 'users.passwordKeep' : 'users.passwordDefault') | i18next
+        }}</clr-control-helper>
+        <clr-control-error>{{ 'validation.minLength' | i18next: { count: 6 } }}</clr-control-error>
+      </clr-password-container>
+    </form>
+    @if (formError()) {
+      <p class="error-text">{{ formError() }}</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="formOpen.set(false)">
+      {{ 'common.cancel' | i18next }}
+    </button>
+    <button type="button" class="btn btn-primary" [clrLoading]="saving()" (click)="save()">
+      {{ 'common.save' | i18next }}
+    </button>
+  </div>
+</clr-modal>

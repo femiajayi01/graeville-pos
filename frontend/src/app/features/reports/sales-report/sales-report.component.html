@@ -1,0 +1,114 @@
+<app-page-header
+  [title]="(bySalesperson() ? 'nav.salespersonReport' : 'nav.salesReport') | i18next"
+/>
+
+<form class="toolbar no-print" (ngSubmit)="run()">
+  <clr-input-container>
+    <label>{{ 'common.from' | i18next }}</label>
+    <input type="date" clrInput name="from" [(ngModel)]="from" required />
+  </clr-input-container>
+  <clr-input-container>
+    <label>{{ 'common.to' | i18next }}</label>
+    <input type="date" clrInput name="to" [(ngModel)]="to" required />
+  </clr-input-container>
+  @if (bySalesperson()) {
+    <clr-select-container>
+      <label>{{ 'reports.salesperson' | i18next }}</label>
+      <select clrSelect name="salesperson" [(ngModel)]="salesperson">
+        @for (name of salespeople(); track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+    </clr-select-container>
+  }
+  <button type="submit" class="btn btn-primary btn-sm" [clrLoading]="loading()">
+    {{ 'reports.run' | i18next }}
+  </button>
+  <button type="button" class="btn btn-outline btn-sm" (click)="print()" [disabled]="!report()">
+    <cds-icon shape="printer"></cds-icon> {{ 'receipt.print' | i18next }}
+  </button>
+</form>
+
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+@if (report(); as r) {
+  <h4 class="period">
+    {{
+      'reports.period'
+        | i18next: { from: (r.from | date: 'dd/MM/yyyy'), to: (r.to | date: 'dd/MM/yyyy') }
+    }}
+    @if (r.salesperson) {
+      — {{ r.salesperson }}
+    }
+  </h4>
+
+  <div class="grid grid-4">
+    <app-stat-card
+      icon="line-chart"
+      [label]="'reports.totalSales' | i18next"
+      [value]="r.totalSales | money"
+    />
+    <app-stat-card
+      icon="wallet"
+      [label]="'reports.discountedSales' | i18next"
+      [value]="r.amountPaid | money"
+      [hint]="'reports.discountGiven' | i18next: { amount: (r.totalDiscount | money) }"
+    />
+    <app-stat-card
+      icon="list"
+      [label]="'reports.orders' | i18next"
+      [value]="r.orderCount"
+      [hint]="'reports.itemsSold' | i18next: { count: r.itemCount }"
+    />
+    <div class="card">
+      <div class="card-block">
+        @for (t of paymentTypes; track t) {
+          <div class="pay-row">
+            <span>{{ t }}</span
+            ><strong>{{ r.byPaymentType[t] | money }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <clr-datagrid class="report-grid">
+    <clr-dg-column>#</clr-dg-column>
+    <clr-dg-column>{{ 'receipt.number' | i18next }}</clr-dg-column>
+    <clr-dg-column>{{ 'receipt.customer' | i18next }}</clr-dg-column>
+    <clr-dg-column class="num">{{ 'pos.total' | i18next }}</clr-dg-column>
+    <clr-dg-column class="num">{{ 'receipt.amountPaid' | i18next }}</clr-dg-column>
+    <clr-dg-column class="num">{{ 'sales.items' | i18next }}</clr-dg-column>
+    <clr-dg-column>{{ 'checkout.paymentType' | i18next }}</clr-dg-column>
+    <clr-dg-column>{{ 'receipt.servedBy' | i18next }}</clr-dg-column>
+    <clr-dg-column>{{ 'receipt.date' | i18next }}</clr-dg-column>
+    <clr-dg-placeholder>{{ 'reports.noSales' | i18next }}</clr-dg-placeholder>
+    <clr-dg-row *clrDgItems="let o of r.orders; let i = index" [clrDgItem]="o">
+      <clr-dg-cell>{{ i + 1 }}</clr-dg-cell>
+      <clr-dg-cell
+        ><a [routerLink]="['/sales/receipt', o.id]" target="_blank">{{
+          o.orderNumber
+        }}</a></clr-dg-cell
+      >
+      <clr-dg-cell>{{ o.customerName || ('receipt.walkIn' | i18next) }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.totalPrice | money }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.amountPaid | money }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.quantity }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.paymentType }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.salesperson }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.createdAt | date: 'dd/MM/yyyy h:mm a' }}</clr-dg-cell>
+    </clr-dg-row>
+    <clr-dg-footer>
+      <clr-dg-pagination #pagination [clrDgPageSize]="50">
+        {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+        {{ pagination.totalItems }}
+      </clr-dg-pagination>
+    </clr-dg-footer>
+  </clr-datagrid>
+}

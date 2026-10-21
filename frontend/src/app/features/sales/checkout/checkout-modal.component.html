@@ -1,0 +1,190 @@
+<clr-modal
+  [clrModalOpen]="true"
+  (clrModalOpenChange)="closed.emit()"
+  clrModalSize="lg"
+  [clrModalStaticBackdrop]="true"
+>
+  <h3 class="modal-title">{{ 'checkout.title' | i18next }}</h3>
+
+  <div class="modal-body">
+    <div class="checkout-grid">
+      <section>
+        <h5 class="section-title">{{ 'checkout.customer' | i18next }}</h5>
+        <div class="btn-group btn-sm mode">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="mode() === 'walk-in'"
+            [class.btn-outline]="mode() !== 'walk-in'"
+            (click)="setMode('walk-in')"
+          >
+            {{ 'checkout.walkIn' | i18next }}
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="mode() === 'existing'"
+            [class.btn-outline]="mode() !== 'existing'"
+            (click)="setMode('existing')"
+          >
+            {{ 'checkout.existing' | i18next }}
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="mode() === 'new'"
+            [class.btn-outline]="mode() !== 'new'"
+            (click)="setMode('new')"
+          >
+            {{ 'checkout.new' | i18next }}
+          </button>
+        </div>
+
+        @switch (mode()) {
+          @case ('walk-in') {
+            <p class="text-muted">{{ 'checkout.walkInHint' | i18next }}</p>
+          }
+          @case ('existing') {
+            <form class="lookup" (ngSubmit)="findCustomer()">
+              <input
+                class="clr-input"
+                name="customerQuery"
+                [(ngModel)]="customerQuery"
+                [placeholder]="'checkout.lookupPlaceholder' | i18next"
+              />
+              <button type="submit" class="btn btn-sm btn-outline" [clrLoading]="searching()">
+                <cds-icon shape="search"></cds-icon> {{ 'common.find' | i18next }}
+              </button>
+            </form>
+            @if (selectedCustomer(); as c) {
+              <div class="selected card">
+                <div class="card-block">
+                  <strong>{{ c.fullName }}</strong>
+                  <div class="p7">
+                    {{ c.phoneNo }}
+                    @if (c.email) {
+                      · {{ c.email }}
+                    }
+                  </div>
+                  @if (c.address) {
+                    <div class="p7 text-muted">{{ c.address }}</div>
+                  }
+                </div>
+              </div>
+            }
+            @if (searchResults().length) {
+              <table class="table table-compact">
+                <tbody>
+                  @for (c of searchResults(); track c.id) {
+                    <tr>
+                      <td class="left">{{ c.fullName }}</td>
+                      <td>{{ c.phoneNo }}</td>
+                      <td>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-link"
+                          (click)="selectedCustomer.set(c); searchResults.set([])"
+                        >
+                          {{ 'common.select' | i18next }}
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          }
+          @case ('new') {
+            <form clrForm clrLayout="vertical" [formGroup]="newCustomer" class="new-customer">
+              <clr-input-container>
+                <label>{{ 'customers.fullName' | i18next }}</label>
+                <input clrInput formControlName="fullName" />
+                <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+              </clr-input-container>
+              <clr-input-container>
+                <label>{{ 'customers.phone' | i18next }}</label>
+                <input clrInput formControlName="phoneNo" inputmode="tel" />
+                <clr-control-error>{{ 'validation.phone' | i18next }}</clr-control-error>
+              </clr-input-container>
+              <clr-input-container>
+                <label>{{ 'customers.email' | i18next }}</label>
+                <input clrInput type="email" formControlName="email" />
+                <clr-control-error>{{ 'validation.email' | i18next }}</clr-control-error>
+              </clr-input-container>
+              <clr-input-container>
+                <label>{{ 'customers.address' | i18next }}</label>
+                <input clrInput formControlName="address" />
+              </clr-input-container>
+              <clr-input-container>
+                <label>{{ 'customers.birthdate' | i18next }}</label>
+                <input clrInput type="date" formControlName="birthdate" />
+              </clr-input-container>
+            </form>
+          }
+        }
+      </section>
+
+      <section class="pay">
+        <h5 class="section-title">{{ 'checkout.payment' | i18next }}</h5>
+        <div class="row">
+          <span>{{ 'pos.items' | i18next }}</span
+          ><span>{{ cart.totalQty() }}</span>
+        </div>
+        <div class="row">
+          <span>{{ 'pos.total' | i18next }}</span
+          ><strong>{{ cart.totalPrice() | money }}</strong>
+        </div>
+
+        <clr-input-container>
+          <label>{{ 'checkout.discount' | i18next }}</label>
+          <input
+            clrInput
+            type="number"
+            min="0"
+            step="0.01"
+            name="discount"
+            [ngModel]="discount()"
+            (ngModelChange)="setDiscount($event)"
+          />
+          <clr-control-helper>{{ 'checkout.discountHint' | i18next }}</clr-control-helper>
+        </clr-input-container>
+        @if (discountInvalid()) {
+          <p class="error-text">{{ 'checkout.discountTooHigh' | i18next }}</p>
+        }
+
+        <clr-select-container>
+          <label>{{ 'checkout.paymentType' | i18next }}</label>
+          <select clrSelect [formControl]="payment">
+            <option value="">{{ 'checkout.selectPayment' | i18next }}</option>
+            @for (p of paymentTypes; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+          <clr-control-error>{{ 'checkout.paymentRequired' | i18next }}</clr-control-error>
+        </clr-select-container>
+
+        <div class="row due">
+          <span>{{ 'checkout.amountDue' | i18next }}</span
+          ><strong>{{ amountDue() | money }}</strong>
+        </div>
+      </section>
+    </div>
+
+    @if (error()) {
+      <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+        <clr-alert-item
+          ><span class="alert-text">{{ error() }}</span></clr-alert-item
+        >
+      </clr-alert>
+    }
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="closed.emit()">
+      {{ 'common.cancel' | i18next }}
+    </button>
+    <button type="button" class="btn btn-success" [clrLoading]="submitting()" (click)="submit()">
+      {{ 'checkout.complete' | i18next }} · {{ amountDue() | money }}
+    </button>
+  </div>
+</clr-modal>

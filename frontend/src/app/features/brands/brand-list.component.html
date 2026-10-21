@@ -1,0 +1,68 @@
+<app-page-header [title]="'nav.brands' | i18next">
+  <button type="button" class="btn btn-primary btn-sm" (click)="open()">
+    <cds-icon shape="plus"></cds-icon> {{ 'brands.add' | i18next }}
+  </button>
+</app-page-header>
+
+<form class="toolbar" (ngSubmit)="applySearch()">
+  <clr-input-container>
+    <label>{{ 'common.search' | i18next }}</label>
+    <input clrInput name="search" [(ngModel)]="search" />
+  </clr-input-container>
+  <button type="submit" class="btn btn-primary btn-sm">{{ 'common.apply' | i18next }}</button>
+</form>
+
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'common.name' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'brands.number' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'common.createdAt' | i18next }}</clr-dg-column>
+  <clr-dg-placeholder>{{ 'common.noRecords' | i18next }}</clr-dg-placeholder>
+
+  @for (row of rows(); track row.id) {
+    <clr-dg-row [clrDgItem]="row">
+      <clr-dg-action-overflow>
+        <button class="action-item" type="button" (click)="open(row)">
+          {{ 'common.edit' | i18next }}
+        </button>
+        @if (auth.isManager()) {
+          <button class="action-item" type="button" (click)="remove(row)">
+            {{ 'common.delete' | i18next }}
+          </button>
+        }
+      </clr-dg-action-overflow>
+      <clr-dg-cell>{{ row.name }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.brandNo }}</clr-dg-cell>
+      <clr-dg-cell>{{ row.createdAt | date: 'dd/MM/yyyy' }}</clr-dg-cell>
+    </clr-dg-row>
+  }
+
+  <clr-dg-footer>
+    <clr-dg-pagination #pagination [clrDgPageSize]="20" [clrDgTotalItems]="total()">
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} {{ 'common.of' | i18next }}
+      {{ total() }}
+    </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="formOpen" clrModalSize="sm">
+  <h3 class="modal-title">{{ (editing() ? 'brands.editTitle' : 'brands.newTitle') | i18next }}</h3>
+  <div class="modal-body">
+    <form clrForm clrLayout="vertical" (ngSubmit)="save()">
+      <clr-input-container>
+        <label>{{ 'common.name' | i18next }}</label>
+        <input clrInput name="name" [(ngModel)]="name" required />
+      </clr-input-container>
+      @if (formError()) {
+        <p class="error-text">{{ formError() }}</p>
+      }
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="formOpen.set(false)">
+      {{ 'common.cancel' | i18next }}
+    </button>
+    <button type="button" class="btn btn-primary" [clrLoading]="saving()" (click)="save()">
+      {{ 'common.save' | i18next }}
+    </button>
+  </div>
+</clr-modal>

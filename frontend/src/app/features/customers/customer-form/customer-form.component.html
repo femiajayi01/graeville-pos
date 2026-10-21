@@ -1,0 +1,45 @@
+<app-page-header [title]="(id() ? 'customers.editTitle' : 'customers.newTitle') | i18next">
+  <a routerLink="/customers" class="btn btn-link btn-sm">&laquo; {{ 'common.back' | i18next }}</a>
+</app-page-header>
+
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+<form clrForm clrLayout="horizontal" [formGroup]="form" (ngSubmit)="save()" class="card">
+  <div class="card-block">
+    <clr-input-container>
+      <label>{{ 'customers.fullName' | i18next }}</label>
+      <input clrInput formControlName="fullName" size="40" />
+      <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'customers.phone' | i18next }}</label>
+      <input clrInput formControlName="phoneNo" inputmode="tel" />
+      <clr-control-error>{{ 'validation.phone' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'customers.email' | i18next }}</label>
+      <input clrInput type="email" formControlName="email" size="40" />
+      <clr-control-error>{{ 'validation.email' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-textarea-container>
+      <label>{{ 'customers.address' | i18next }}</label>
+      <textarea clrTextarea formControlName="address" rows="2"></textarea>
+    </clr-textarea-container>
+    <clr-input-container>
+      <label>{{ 'customers.birthdate' | i18next }}</label>
+      <input clrInput type="date" formControlName="birthdate" />
+    </clr-input-container>
+  </div>
+  <div class="card-footer">
+    <button type="submit" class="btn btn-primary" [clrLoading]="saving()">
+      {{ 'common.save' | i18next }}
+    </button>
+    <a routerLink="/customers" class="btn btn-outline">{{ 'common.cancel' | i18next }}</a>
+  </div>
+</form>

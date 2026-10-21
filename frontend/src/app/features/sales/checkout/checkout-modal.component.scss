@@ -1,0 +1,53 @@
+.checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 800px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-title {
+  margin-top: 0;
+}
+
+.mode {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.lookup {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  input {
+    flex: 1;
+  }
+}
+
+.selected {
+  margin-top: 0.75rem;
+}
+
+.pay {
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+  }
+
+  .due {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--cds-alias-object-border-color, #ddd);
+    font-size: 1.3rem;
+  }
+}
+
+.error-text {
+  color: var(--cds-alias-status-danger, #c21d00);
+  margin: 0.25rem 0 0;
+}

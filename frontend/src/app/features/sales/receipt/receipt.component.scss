@@ -1,0 +1,103 @@
+.toolbar {
+  align-items: center;
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+/* Narrow layout that prints well on 80mm thermal printers and A4 alike. */
+.receipt {
+  position: relative;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px dashed #bbb;
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: 13px;
+  color: #000;
+
+  .receipt-head {
+    text-align: center;
+    border-bottom: 1px dashed #999;
+    padding-bottom: 0.5rem;
+
+    h3 {
+      margin: 0;
+      font-family: inherit;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0.1rem 0;
+    }
+  }
+
+  .meta,
+  .totals {
+    padding: 0.5rem 0;
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+  }
+
+  .lines {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px dashed #999;
+    border-bottom: 1px dashed #999;
+
+    th,
+    td {
+      padding: 0.2rem 0.1rem;
+      text-align: center;
+    }
+
+    .left {
+      text-align: left;
+    }
+  }
+
+  .grand {
+    font-size: 1.1em;
+  }
+
+  .receipt-foot {
+    text-align: center;
+    border-top: 1px dashed #999;
+    padding-top: 0.5rem;
+  }
+}
+
+.returned-stamp {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-18deg);
+  border: 3px solid #c21d00;
+  color: #c21d00;
+  font-size: 1.8rem;
+  font-weight: 700;
+  padding: 0.25rem 1rem;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.returned-note {
+  color: #c21d00;
+  text-align: center;
+}
+
+@media print {
+  .receipt {
+    border: 0;
+    max-width: none;
+    width: 72mm;
+    margin: 0;
+    padding: 0;
+  }
+}

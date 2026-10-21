@@ -1,0 +1,69 @@
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+@if (customer(); as c) {
+  <app-page-header [title]="c.fullName" [subtitle]="c.phoneNo">
+    <a routerLink="/customers" class="btn btn-link btn-sm">&laquo; {{ 'common.back' | i18next }}</a>
+    <a [routerLink]="['/customers', c.id, 'edit']" class="btn btn-outline btn-sm"
+      ><cds-icon shape="pencil"></cds-icon> {{ 'common.edit' | i18next }}</a
+    >
+  </app-page-header>
+
+  <div class="card">
+    <div class="card-block">
+      <table class="table table-vertical table-noborder">
+        <tbody>
+          <tr>
+            <th>{{ 'customers.email' | i18next }}</th>
+            <td>{{ c.email || '—' }}</td>
+          </tr>
+          <tr>
+            <th>{{ 'customers.address' | i18next }}</th>
+            <td>{{ c.address || '—' }}</td>
+          </tr>
+          <tr>
+            <th>{{ 'customers.birthdate' | i18next }}</th>
+            <td>{{ c.birthdate ? (c.birthdate | date: 'd MMMM yyyy') : '—' }}</td>
+          </tr>
+          <tr>
+            <th>{{ 'customers.registeredBy' | i18next }}</th>
+            <td>{{ c.registeredBy }} · {{ c.createdAt | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<h4>{{ 'customers.orders' | i18next }}</h4>
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading()">
+  <clr-dg-column>{{ 'receipt.number' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'sales.items' | i18next }}</clr-dg-column>
+  <clr-dg-column class="num">{{ 'receipt.amountPaid' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'receipt.servedBy' | i18next }}</clr-dg-column>
+  <clr-dg-column>{{ 'receipt.date' | i18next }}</clr-dg-column>
+  <clr-dg-placeholder>{{ 'sales.none' | i18next }}</clr-dg-placeholder>
+  @for (o of orders(); track o.id) {
+    <clr-dg-row [clrDgItem]="o">
+      <clr-dg-cell>
+        <a [routerLink]="['/sales/receipt', o.id]">{{ o.orderNumber }}</a>
+        @if (o.isReturned) {
+          <span class="label label-danger">{{ 'sales.returned' | i18next }}</span>
+        }
+      </clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.quantity }}</clr-dg-cell>
+      <clr-dg-cell class="num">{{ o.amountPaid | money }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.salesperson }}</clr-dg-cell>
+      <clr-dg-cell>{{ o.createdAt | date: 'dd/MM/yyyy h:mm a' }}</clr-dg-cell>
+    </clr-dg-row>
+  }
+  <clr-dg-footer>
+    {{ 'customers.spentOnPage' | i18next }}: <strong>&nbsp;{{ spent() | money }}</strong>
+    <clr-dg-pagination [clrDgPageSize]="20" [clrDgTotalItems]="total()"></clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>

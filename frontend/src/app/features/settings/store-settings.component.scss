@@ -1,0 +1,75 @@
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  margin-top: 0;
+}
+
+.currency {
+  width: 5rem;
+  text-transform: uppercase;
+}
+
+.updated {
+  margin-left: 0.5rem;
+}
+
+.preview-title {
+  margin-top: 0;
+}
+
+.receipt-preview {
+  padding: 1rem 1.1rem;
+  background: #fff;
+  color: #000;
+  border: 1px dashed #bbb;
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: 12px;
+
+  .head {
+    text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #999;
+    margin-bottom: 0.5rem;
+    white-space: pre-line;
+
+    strong {
+      font-size: 15px;
+    }
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .lines {
+    border-top: 1px dashed #999;
+    border-bottom: 1px dashed #999;
+    margin: 0.4rem 0;
+    padding: 0.3rem 0;
+  }
+
+  .total {
+    font-weight: 700;
+  }
+
+  .foot {
+    text-align: center;
+    border-top: 1px dashed #999;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    white-space: pre-line;
+  }
+}

@@ -1,0 +1,70 @@
+<app-page-header [title]="(id() ? 'products.editTitle' : 'products.newTitle') | i18next">
+  <a routerLink="/products" class="btn btn-link btn-sm">&laquo; {{ 'common.back' | i18next }}</a>
+</app-page-header>
+
+@if (error()) {
+  <clr-alert clrAlertType="danger" [clrAlertClosable]="false">
+    <clr-alert-item
+      ><span class="alert-text">{{ error() }}</span></clr-alert-item
+    >
+  </clr-alert>
+}
+
+<form clrForm clrLayout="horizontal" [formGroup]="form" (ngSubmit)="save()" class="card">
+  <div class="card-block">
+    <clr-input-container>
+      <label>{{ 'products.name' | i18next }}</label>
+      <input clrInput formControlName="name" size="40" />
+      <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'products.barcode' | i18next }}</label>
+      <input clrInput formControlName="barcode" size="30" />
+      <clr-control-helper>{{ 'products.barcodeHint' | i18next }}</clr-control-helper>
+      <clr-control-error>{{ 'validation.required' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'products.costPrice' | i18next }} (₦)</label>
+      <input clrInput type="number" step="0.01" min="0" formControlName="costPrice" />
+      <clr-control-error>{{ 'validation.nonNegative' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'products.sellingPrice' | i18next }} (₦)</label>
+      <input clrInput type="number" step="0.01" min="0" formControlName="sellingPrice" />
+      <clr-control-error>{{ 'validation.nonNegative' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-input-container>
+      <label>{{ 'products.stock' | i18next }}</label>
+      <input clrInput type="number" step="1" min="0" formControlName="quantity" />
+      <clr-control-error>{{ 'validation.wholeNumber' | i18next }}</clr-control-error>
+    </clr-input-container>
+    <clr-select-container>
+      <label>{{ 'products.brand' | i18next }}</label>
+      <select clrSelect formControlName="brandId">
+        <option [ngValue]="null">{{ 'common.none' | i18next }}</option>
+        @for (b of brands(); track b.id) {
+          <option [ngValue]="b.id">{{ b.name }}</option>
+        }
+      </select>
+    </clr-select-container>
+    <clr-select-container>
+      <label>{{ 'products.category' | i18next }}</label>
+      <select clrSelect formControlName="categoryId">
+        <option [ngValue]="null">{{ 'common.none' | i18next }}</option>
+        @for (c of categories(); track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </clr-select-container>
+    <clr-textarea-container>
+      <label>{{ 'products.description' | i18next }}</label>
+      <textarea clrTextarea formControlName="description" rows="3"></textarea>
+    </clr-textarea-container>
+  </div>
+  <div class="card-footer">
+    <button type="submit" class="btn btn-primary" [clrLoading]="saving()">
+      {{ 'common.save' | i18next }}
+    </button>
+    <a routerLink="/products" class="btn btn-outline">{{ 'common.cancel' | i18next }}</a>
+  </div>
+</form>

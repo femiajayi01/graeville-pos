@@ -1,0 +1,33 @@
+.branding .title {
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+:host .branding .nav-link .product {
+  margin-left: 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid rgb(255 255 255 / 35%);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 70%);
+  white-space: nowrap;
+}
+
+.header-actions {
+  align-items: center;
+
+  .badge {
+    margin-left: -0.4rem;
+  }
+}
+
+.search input {
+  min-width: 14rem;
+}
+
+@media (max-width: 768px) {
+  .search {
+    display: none;
+  }
+}
